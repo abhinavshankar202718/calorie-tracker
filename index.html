@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#16a34a" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Calories">
+  <link rel="apple-touch-icon" href="icon-180.png">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
+  <title>Calorie Tracker</title>
+</head>
+<body>
+
+  <!-- ════════════════════════════════════════════════
+       TODAY SCREEN
+  ═══════════════════════════════════════════════════ -->
+  <div id="screen-today" class="screen active">
+    <header class="top-bar">
+      <button class="icon-btn" id="prev-day" aria-label="Previous day">&#8249;</button>
+      <h1 id="date-display">Today</h1>
+      <button class="icon-btn" id="next-day" aria-label="Next day">&#8250;</button>
+    </header>
+    <!-- log.js renders totals + meal sections into this div -->
+    <main class="content" id="today-content"></main>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       FOODS SCREEN
+  ═══════════════════════════════════════════════════ -->
+  <div id="screen-foods" class="screen">
+    <header class="top-bar">
+      <h1>My Foods</h1>
+      <div class="top-bar-actions">
+        <button class="icon-btn" id="scan-btn" aria-label="Scan barcode">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <rect x="1"  y="3" width="2" height="18" rx="0.5"/>
+            <rect x="4"  y="3" width="1" height="18" rx="0.5"/>
+            <rect x="6"  y="3" width="2" height="18" rx="0.5"/>
+            <rect x="9"  y="3" width="1" height="18" rx="0.5"/>
+            <rect x="11" y="3" width="3" height="18" rx="0.5"/>
+            <rect x="15" y="3" width="1" height="18" rx="0.5"/>
+            <rect x="17" y="3" width="2" height="18" rx="0.5"/>
+            <rect x="20" y="3" width="1" height="18" rx="0.5"/>
+            <rect x="22" y="3" width="1" height="18" rx="0.5"/>
+          </svg>
+        </button>
+        <button class="icon-btn" id="add-food-btn" aria-label="Add food manually">+</button>
+      </div>
+    </header>
+    <div class="search-bar-wrap">
+      <input type="search" id="food-search" class="search-input"
+             placeholder="Search your foods…" autocomplete="off" autocorrect="off">
+    </div>
+    <main class="content" id="foods-list-container"></main>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       MEALS SCREEN
+  ═══════════════════════════════════════════════════ -->
+  <div id="screen-meals" class="screen">
+    <header class="top-bar">
+      <h1>Saved Meals</h1>
+      <button class="icon-btn" id="add-meal-btn" aria-label="Add meal">+</button>
+    </header>
+    <main class="content" id="meals-list"></main>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       WAIST SCREEN
+  ═══════════════════════════════════════════════════ -->
+  <div id="screen-waist" class="screen">
+    <header class="top-bar">
+      <h1>Waist Log</h1>
+      <button class="icon-btn" id="add-waist-btn" aria-label="Add measurement">+</button>
+    </header>
+    <main class="content" id="waist-content"></main>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       SETTINGS SCREEN
+  ═══════════════════════════════════════════════════ -->
+  <div id="screen-settings" class="screen">
+    <header class="top-bar">
+      <h1>Settings</h1>
+    </header>
+    <main class="content">
+
+      <div class="settings-card">
+        <h2 class="settings-section-title">Daily Targets</h2>
+
+        <div class="field-group">
+          <label class="field-label" for="target-kcal">Calories (kcal)</label>
+          <input type="number" id="target-kcal" class="field-input"
+                 placeholder="2300" min="0" step="1" inputmode="decimal">
+        </div>
+
+        <div class="fields-row">
+          <div class="field-group half">
+            <label class="field-label" for="target-protein">Protein (g)</label>
+            <input type="number" id="target-protein" class="field-input"
+                   placeholder="143" min="0" step="0.1" inputmode="decimal">
+          </div>
+          <div class="field-group half">
+            <label class="field-label" for="target-fibre">Fibre (g)</label>
+            <input type="number" id="target-fibre" class="field-input"
+                   placeholder="35" min="0" step="0.1" inputmode="decimal">
+          </div>
+        </div>
+
+        <p class="field-error" id="settings-error"></p>
+
+        <div style="display:flex;gap:10px;margin-top:4px">
+          <button class="btn btn-primary"   id="settings-save-btn"  type="button" style="flex:2">Save</button>
+          <button class="btn btn-secondary" id="settings-reset-btn" type="button" style="flex:1">Reset to Defaults</button>
+        </div>
+      </div>
+
+      <!-- Add to Home Screen instructions -->
+      <div class="settings-card" style="margin-top:12px">
+        <h2 class="settings-section-title">Add to iPhone Home Screen</h2>
+        <ol class="install-steps">
+          <li>Open this page in <strong>Safari</strong> on your iPhone.</li>
+          <li>Tap the <strong>Share</strong> button <span class="share-icon" aria-label="Share icon">⎙</span> at the bottom of the screen.</li>
+          <li>Scroll down and tap <strong>"Add to Home Screen"</strong>.</li>
+          <li>Tap <strong>Add</strong> — the app icon appears on your Home Screen.</li>
+        </ol>
+        <p class="export-hint" style="margin-top:8px">The app then runs full-screen with no browser chrome, exactly like a native app.</p>
+      </div>
+
+      <!-- Export / Import -->
+      <div class="settings-card" style="margin-top:12px">
+        <h2 class="settings-section-title">Data Backup</h2>
+        <p class="export-hint">All your data lives on this device. Back it up regularly.</p>
+        <div style="display:flex;gap:10px;margin-top:4px">
+          <button class="btn btn-primary"   id="export-btn" type="button" style="flex:1">⬇ Export JSON</button>
+          <button class="btn btn-secondary" id="import-btn" type="button" style="flex:1">⬆ Import JSON</button>
+        </div>
+        <!-- Hidden file input -->
+        <input type="file" id="import-file-input" accept=".json,application/json" style="display:none">
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Toast banner (shared) -->
+  <div id="settings-banner" class="settings-banner" aria-live="polite"></div>
+
+  <!-- ════════════════════════════════════════════════
+       BOTTOM NAVIGATION
+  ═══════════════════════════════════════════════════ -->
+  <nav class="bottom-nav" role="navigation" aria-label="Main">
+    <button class="nav-btn active" data-screen="today">
+      <span class="nav-icon" aria-hidden="true">📋</span>
+      <span class="nav-label">Today</span>
+    </button>
+    <button class="nav-btn" data-screen="foods">
+      <span class="nav-icon" aria-hidden="true">🥗</span>
+      <span class="nav-label">Foods</span>
+    </button>
+    <button class="nav-btn" data-screen="meals">
+      <span class="nav-icon" aria-hidden="true">⭐</span>
+      <span class="nav-label">Meals</span>
+    </button>
+    <button class="nav-btn" data-screen="waist">
+      <span class="nav-icon" aria-hidden="true">📏</span>
+      <span class="nav-label">Waist</span>
+    </button>
+    <button class="nav-btn" data-screen="settings">
+      <span class="nav-icon" aria-hidden="true">⚙️</span>
+      <span class="nav-label">Settings</span>
+    </button>
+  </nav>
+
+  <!-- ════════════════════════════════════════════════
+       FOOD PICKER SHEET  (Today → pick which food to log)
+  ═══════════════════════════════════════════════════ -->
+  <div id="food-picker-sheet" class="sheet-overlay" role="dialog" aria-modal="true"
+       aria-labelledby="picker-title">
+    <div class="sheet sheet-tall">
+      <div class="sheet-handle"></div>
+      <div class="picker-header">
+        <h2 class="sheet-title" id="picker-title">Add to Breakfast</h2>
+        <button class="icon-btn" id="picker-close" aria-label="Close picker">✕</button>
+      </div>
+      <div class="search-bar-wrap" style="padding: 0 0 10px">
+        <input type="search" id="picker-search" class="search-input"
+               placeholder="Search your foods…" autocomplete="off" autocorrect="off">
+      </div>
+      <!-- Scrollable food list -->
+      <div id="picker-list" class="picker-list"></div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       GRAMS ENTRY SHEET  (Today → enter how many grams)
+  ═══════════════════════════════════════════════════ -->
+  <div id="grams-sheet" class="sheet-overlay" role="dialog" aria-modal="true"
+       aria-labelledby="grams-sheet-title">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <h2 class="sheet-title" id="grams-sheet-title">How many grams?</h2>
+
+      <!-- Food name + label -->
+      <div class="grams-food-row">
+        <span class="grams-food-name" id="grams-food-name"></span>
+        <span class="label-badge" id="grams-food-label"></span>
+      </div>
+
+      <!-- Grams input -->
+      <div class="field-group" style="margin-top:14px">
+        <label class="field-label" for="grams-input">Grams</label>
+        <input type="number" id="grams-input" class="field-input grams-big-input"
+               placeholder="100" min="1" step="any" inputmode="decimal"
+               autocomplete="off">
+        <p class="field-error" id="grams-error"></p>
+      </div>
+
+      <!-- Quick-pick amounts -->
+      <div class="quick-grams">
+        <button class="quick-gram-btn" data-g="25"  type="button">25g</button>
+        <button class="quick-gram-btn" data-g="50"  type="button">50g</button>
+        <button class="quick-gram-btn" data-g="100" type="button">100g</button>
+        <button class="quick-gram-btn" data-g="150" type="button">150g</button>
+        <button class="quick-gram-btn" data-g="200" type="button">200g</button>
+      </div>
+
+      <!-- Live macro preview -->
+      <p id="grams-preview" class="grams-preview">Enter grams to see nutrition</p>
+
+      <div class="sheet-actions">
+        <button class="btn btn-primary btn-full" id="grams-save-btn" type="button">
+          Save Entry
+        </button>
+        <button class="btn btn-danger btn-full" id="grams-delete-btn"
+                type="button" style="display:none">
+          Delete Entry
+        </button>
+        <button class="btn btn-secondary btn-full" id="grams-cancel-btn" type="button">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       FOOD ADD / EDIT SHEET  (My Foods screen)
+  ═══════════════════════════════════════════════════ -->
+  <div id="food-sheet" class="sheet-overlay" role="dialog" aria-modal="true"
+       aria-labelledby="food-sheet-title">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <h2 class="sheet-title" id="food-sheet-title">Add Food</h2>
+
+      <div class="field-group">
+        <label class="field-label" for="food-name">Name</label>
+        <input type="text" id="food-name" class="field-input"
+               placeholder="e.g. Rolled Oats" autocomplete="off" autocorrect="off">
+        <p class="field-error" id="food-name-error"></p>
+      </div>
+
+      <div class="field-group">
+        <span class="field-label">Weighed as</span>
+        <div class="seg-control" id="food-label-ctrl" role="group">
+          <button class="seg-btn active" data-value="dry"     type="button">Dry</button>
+          <button class="seg-btn"        data-value="raw"     type="button">Raw</button>
+          <button class="seg-btn"        data-value="cooked"  type="button">Cooked</button>
+          <button class="seg-btn"        data-value="as sold" type="button">As sold</button>
+        </div>
+      </div>
+
+      <p class="field-label" style="margin-bottom:12px;margin-top:4px">Nutrition per 100 g</p>
+
+      <div class="fields-row">
+        <div class="field-group half">
+          <label class="field-label" for="food-kcal">Calories (kcal)</label>
+          <input type="number" id="food-kcal" class="field-input"
+                 placeholder="0" min="0" step="any" inputmode="decimal">
+        </div>
+        <div class="field-group half">
+          <label class="field-label" for="food-protein">Protein (g)</label>
+          <input type="number" id="food-protein" class="field-input"
+                 placeholder="0" min="0" step="any" inputmode="decimal">
+        </div>
+      </div>
+
+      <div class="fields-row">
+        <div class="field-group half">
+          <label class="field-label" for="food-carbs">Carbs (g)</label>
+          <input type="number" id="food-carbs" class="field-input"
+                 placeholder="0" min="0" step="any" inputmode="decimal">
+        </div>
+        <div class="field-group half">
+          <label class="field-label" for="food-fat">Fat (g)</label>
+          <input type="number" id="food-fat" class="field-input"
+                 placeholder="0" min="0" step="any" inputmode="decimal">
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label" for="food-fibre">Fibre (g)</label>
+        <input type="number" id="food-fibre" class="field-input"
+               placeholder="0" min="0" step="any" inputmode="decimal">
+      </div>
+
+      <div class="sheet-actions">
+        <button class="btn btn-primary btn-full" id="food-save-btn" type="button">Save Food</button>
+        <button class="btn btn-danger btn-full" id="food-delete-btn"
+                type="button" style="display:none">Delete Food</button>
+        <button class="btn btn-secondary btn-full" id="food-cancel-btn" type="button">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       BARCODE SCANNER OVERLAY
+  ═══════════════════════════════════════════════════ -->
+  <div id="scanner-overlay" class="scanner-overlay" role="dialog" aria-modal="true">
+    <header class="scanner-header">
+      <button class="icon-btn" id="scanner-close" aria-label="Close scanner">✕</button>
+      <h2>Scan Barcode</h2>
+      <div style="width:44px"></div>
+    </header>
+    <div id="qr-reader" class="qr-reader"></div>
+    <div class="scanner-bottom">
+      <p id="scanner-status" class="scanner-status-text">Starting camera…</p>
+      <button class="btn btn-secondary" id="scanner-manual" type="button">
+        Enter Manually Instead
+      </button>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       BARCODE RESULT SHEET
+  ═══════════════════════════════════════════════════ -->
+  <div id="barcode-result-sheet" class="sheet-overlay" role="dialog" aria-modal="true">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <h2 class="sheet-title">Product Details</h2>
+      <p class="barcode-num-line">Barcode: <span id="barcode-num" class="barcode-num-val"></span></p>
+      <p id="barcode-status" class="barcode-status-text"></p>
+
+      <div class="field-group">
+        <label class="field-label" for="barcode-name">Name</label>
+        <input type="text" id="barcode-name" class="field-input"
+               placeholder="Product name" autocomplete="off" autocorrect="off">
+        <p class="field-error" id="barcode-name-error"></p>
+      </div>
+
+      <div class="field-group">
+        <span class="field-label">Weighed as</span>
+        <div class="seg-control" id="barcode-label-ctrl" role="group">
+          <button class="seg-btn"        data-value="dry"     type="button">Dry</button>
+          <button class="seg-btn"        data-value="raw"     type="button">Raw</button>
+          <button class="seg-btn"        data-value="cooked"  type="button">Cooked</button>
+          <button class="seg-btn active" data-value="as sold" type="button">As sold</button>
+        </div>
+      </div>
+
+      <p class="field-label" style="margin-bottom:12px">Nutrition per 100 g</p>
+
+      <div class="fields-row">
+        <div class="field-group half">
+          <label class="field-label" for="barcode-kcal">Calories (kcal)</label>
+          <input type="number" id="barcode-kcal" class="field-input"
+                 placeholder="0" min="0" step="any" inputmode="decimal">
+        </div>
+        <div class="field-group half">
+          <label class="field-label" for="barcode-protein">Protein (g)</label>
+          <input type="number" id="barcode-protein" class="field-input"
+                 placeholder="0" min="0" step="any" inputmode="decimal">
+        </div>
+      </div>
+
+      <div class="fields-row">
+        <div class="field-group half">
+          <label class="field-label" for="barcode-carbs">Carbs (g)</label>
+          <input type="number" id="barcode-carbs" class="field-input"
+                 placeholder="0" min="0" step="any" inputmode="decimal">
+        </div>
+        <div class="field-group half">
+          <label class="field-label" for="barcode-fat">Fat (g)</label>
+          <input type="number" id="barcode-fat" class="field-input"
+                 placeholder="0" min="0" step="any" inputmode="decimal">
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label" for="barcode-fibre">Fibre (g)</label>
+        <input type="number" id="barcode-fibre" class="field-input"
+               placeholder="0" min="0" step="any" inputmode="decimal">
+      </div>
+
+      <div class="sheet-actions">
+        <button class="btn btn-primary btn-full" id="barcode-save-btn" type="button">Save to My Foods</button>
+        <button class="btn btn-secondary btn-full" id="barcode-cancel-btn" type="button">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       CHEAT MEAL PICKER SHEET
+  ═══════════════════════════════════════════════════ -->
+  <div id="cheat-meal-sheet" class="sheet-overlay" role="dialog" aria-modal="true">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <h2 class="sheet-title">Which meal was the cheat?</h2>
+      <div class="sheet-actions">
+        <button class="btn btn-secondary btn-full cheat-meal-option" data-meal="breakfast" type="button">Breakfast</button>
+        <button class="btn btn-secondary btn-full cheat-meal-option" data-meal="lunch"     type="button">Lunch</button>
+        <button class="btn btn-secondary btn-full cheat-meal-option" data-meal="evening"   type="button">Evening</button>
+        <button class="btn btn-secondary btn-full cheat-meal-option" data-meal="dinner"    type="button">Dinner</button>
+        <button class="btn btn-danger    btn-full cheat-meal-option" data-meal=""          type="button">Clear Cheat Meal</button>
+        <button class="btn btn-secondary btn-full" id="cheat-meal-cancel"                  type="button">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       MEAL VIEW SHEET  (tap a template to see it)
+  ═══════════════════════════════════════════════════ -->
+  <div id="meal-view-sheet" class="sheet-overlay" role="dialog" aria-modal="true">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <div class="picker-header" style="margin-bottom:4px">
+        <h2 class="sheet-title" id="meal-view-title">Meal Name</h2>
+        <button class="icon-btn" id="meal-view-close-btn" aria-label="Close">✕</button>
+      </div>
+      <p id="meal-view-totals" class="meal-view-totals"></p>
+      <div id="meal-view-items" style="margin:12px 0"></div>
+      <div class="sheet-actions">
+        <button class="btn btn-primary btn-full" id="meal-view-add-btn" type="button">Add to Day →</button>
+        <button class="btn btn-secondary btn-full" id="meal-view-edit-btn" type="button">Edit Template</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       SLOT PICKER SHEET  (which meal to add to)
+  ═══════════════════════════════════════════════════ -->
+  <div id="slot-picker-sheet" class="sheet-overlay" role="dialog" aria-modal="true">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <h2 class="sheet-title">Add to which meal?</h2>
+      <div class="sheet-actions">
+        <button class="btn btn-secondary btn-full meal-slot-btn" data-slot="breakfast" type="button">Breakfast</button>
+        <button class="btn btn-secondary btn-full meal-slot-btn" data-slot="lunch"     type="button">Lunch</button>
+        <button class="btn btn-secondary btn-full meal-slot-btn" data-slot="evening"   type="button">Evening</button>
+        <button class="btn btn-secondary btn-full meal-slot-btn" data-slot="dinner"    type="button">Dinner</button>
+        <button class="btn btn-secondary btn-full" id="slot-picker-cancel"             type="button">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       MEAL EDIT SHEET  (create / edit a template)
+  ═══════════════════════════════════════════════════ -->
+  <div id="meal-edit-sheet" class="sheet-overlay" role="dialog" aria-modal="true">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <h2 class="sheet-title" id="meal-edit-title">New Meal</h2>
+
+      <div class="field-group">
+        <label class="field-label" for="meal-edit-name">Meal Name</label>
+        <input type="text" id="meal-edit-name" class="field-input"
+               placeholder="e.g. Dal Rice" autocomplete="off" autocorrect="off">
+        <p class="field-error" id="meal-edit-error"></p>
+      </div>
+
+      <p class="field-label" style="margin-bottom:8px">Foods</p>
+      <div id="meal-edit-items"></div>
+
+      <button class="btn btn-secondary btn-full" id="meal-edit-add-item-btn"
+              type="button" style="margin-top:4px;margin-bottom:16px">+ Add Food</button>
+
+      <div class="sheet-actions">
+        <button class="btn btn-primary   btn-full" id="meal-edit-save-btn"   type="button">Save Meal</button>
+        <button class="btn btn-danger    btn-full" id="meal-edit-delete-btn" type="button" style="display:none">Delete Meal</button>
+        <button class="btn btn-secondary btn-full" id="meal-edit-cancel-btn" type="button">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       MEAL ITEM FOOD PICKER  (pick food for a template item)
+  ═══════════════════════════════════════════════════ -->
+  <div id="meal-item-picker-sheet" class="sheet-overlay" role="dialog" aria-modal="true">
+    <div class="sheet sheet-tall">
+      <div class="sheet-handle"></div>
+      <div class="picker-header">
+        <h2 class="sheet-title">Add Food</h2>
+        <button class="icon-btn" id="meal-item-picker-close" aria-label="Close">✕</button>
+      </div>
+      <div class="search-bar-wrap" style="padding:0 0 10px">
+        <input type="search" id="meal-item-picker-search" class="search-input"
+               placeholder="Search your foods…" autocomplete="off" autocorrect="off">
+      </div>
+      <div id="meal-item-picker-list" class="picker-list"></div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       MEAL ITEM GRAMS SHEET  (how many grams for template item)
+  ═══════════════════════════════════════════════════ -->
+  <div id="meal-item-grams-sheet" class="sheet-overlay" role="dialog" aria-modal="true">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <h2 class="sheet-title">Set Grams</h2>
+
+      <div class="grams-food-row">
+        <span class="grams-food-name" id="meal-item-grams-food-name"></span>
+        <span class="label-badge"     id="meal-item-grams-food-label"></span>
+      </div>
+
+      <div class="field-group" style="margin-top:14px">
+        <label class="field-label" for="meal-item-grams-input">Grams</label>
+        <input type="number" id="meal-item-grams-input" class="field-input grams-big-input"
+               placeholder="100" min="1" step="any" inputmode="decimal" autocomplete="off">
+        <p class="field-error" id="meal-item-grams-error"></p>
+      </div>
+
+      <div class="quick-grams">
+        <button class="quick-gram-btn meal-item-quick-gram-btn" data-g="25"  type="button">25g</button>
+        <button class="quick-gram-btn meal-item-quick-gram-btn" data-g="50"  type="button">50g</button>
+        <button class="quick-gram-btn meal-item-quick-gram-btn" data-g="100" type="button">100g</button>
+        <button class="quick-gram-btn meal-item-quick-gram-btn" data-g="150" type="button">150g</button>
+        <button class="quick-gram-btn meal-item-quick-gram-btn" data-g="200" type="button">200g</button>
+      </div>
+
+      <p id="meal-item-grams-preview" class="grams-preview">Enter grams to see nutrition</p>
+
+      <div class="sheet-actions">
+        <button class="btn btn-primary   btn-full" id="meal-item-grams-save-btn"   type="button">Add to Meal</button>
+        <button class="btn btn-danger    btn-full" id="meal-item-grams-delete-btn" type="button" style="display:none">Remove Item</button>
+        <button class="btn btn-secondary btn-full" id="meal-item-grams-cancel-btn" type="button">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       WAIST EDIT SHEET
+  ═══════════════════════════════════════════════════ -->
+  <div id="waist-edit-sheet" class="sheet-overlay" role="dialog" aria-modal="true">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <h2 class="sheet-title" id="waist-sheet-title">Log Waist</h2>
+
+      <div class="form-row">
+        <label class="form-label" for="waist-cm-input">Waist (cm)</label>
+        <input id="waist-cm-input" class="form-input" type="number" inputmode="decimal"
+               placeholder="e.g. 82.5" min="30" max="200" step="0.1">
+      </div>
+
+      <div class="form-row">
+        <label class="form-label" for="waist-date-input">Date</label>
+        <input id="waist-date-input" class="form-input" type="date">
+      </div>
+
+      <div class="form-row">
+        <label class="form-label" for="waist-note-input">Note (optional)</label>
+        <input id="waist-note-input" class="form-input" type="text" placeholder="e.g. morning, after gym">
+      </div>
+
+      <p id="waist-error" class="form-error"></p>
+
+      <div class="sheet-actions">
+        <button class="btn btn-primary   btn-full" id="waist-save-btn"   type="button">Save</button>
+        <button class="btn btn-danger    btn-full" id="waist-delete-btn" type="button" style="display:none">Delete</button>
+        <button class="btn btn-secondary btn-full" id="waist-cancel-btn" type="button">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       IMPORT CONFIRM SHEET
+  ═══════════════════════════════════════════════════ -->
+  <div id="import-sheet" class="sheet-overlay" role="dialog" aria-modal="true">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <h2 class="sheet-title">Import Backup</h2>
+      <p class="export-hint" id="import-sheet-summary"></p>
+      <p class="export-hint" style="margin-top:8px">
+        <strong>Replace</strong> clears all current data then loads the backup.<br>
+        <strong>Merge</strong> adds missing records without deleting anything.
+      </p>
+      <div class="sheet-actions">
+        <button class="btn btn-danger    btn-full" id="import-replace-btn" type="button">Replace All Data</button>
+        <button class="btn btn-primary   btn-full" id="import-merge-btn"   type="button">Merge</button>
+        <button class="btn btn-secondary btn-full" id="import-cancel-btn"  type="button">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts: db → log → foods → meals → settings → scanner → waist → export → app -->
+  <script src="db.js"></script>
+  <script src="log.js"></script>
+  <script src="foods.js"></script>
+  <script src="meals.js"></script>
+  <script src="settings.js"></script>
+  <script src="scanner.js"></script>
+  <script src="waist.js"></script>
+  <script src="export.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
